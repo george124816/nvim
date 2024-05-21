@@ -17,25 +17,11 @@ require("lazy").setup({
 
 	-- core
 	{ "nvim-telescope/telescope.nvim", dependencies = { "nvim-lua/plenary.nvim" } },
-	{
-		"nvim-treesitter/nvim-treesitter",
-		build = ":TSUpdate",
-		config = function()
-			local configs = require("nvim-treesitter.configs")
-			configs.setup({
-				ensure_installed = { "lua", "elixir" },
-				ignore_install = { "javascript" },
-				modules = {},
-				auto_install = true,
-				sync_install = false,
-				highlight = { enable = true },
-				indent = { enable = true },
-			})
-		end,
-	},
 	{ "elixir-editors/vim-elixir" },
 	{ "vim-test/vim-test" },
 	{ "tpope/vim-commentary" },
+	{ "tpope/vim-sleuth" },
+	{ "tpope/vim-projectionist" },
 	{ "kassio/neoterm" },
 
 	-- lsp
@@ -50,12 +36,11 @@ require("lazy").setup({
 		},
 		config = function()
 			vim.api.nvim_create_autocmd("LspAttach", {
-				group = vim.api.nvim_create_augroup("lsp-attach", { clear = true }),
+				group = vim.api.nvim_create_augroup("kickstart-lsp-attach", { clear = true }),
 				callback = function(event)
 					local map = function(keys, func, desc)
 						vim.keymap.set("n", keys, func, { buffer = event.buf, desc = "LSP: " .. desc })
 					end
-
 					map("gd", require("telescope.builtin").lsp_definitions, "[G]oto [D]efinition")
 					map("gr", require("telescope.builtin").lsp_references, "[G]oto [R]eferences")
 					map("gI", require("telescope.builtin").lsp_implementations, "[G]oto [I]mplementation")
@@ -70,10 +55,10 @@ require("lazy").setup({
 					map("<leader>ca", vim.lsp.buf.code_action, "[C]ode [A]ction")
 					map("K", vim.lsp.buf.hover, "Hover Documentation")
 					map("gD", vim.lsp.buf.declaration, "[G]oto [D]eclaration")
-
 					local client = vim.lsp.get_client_by_id(event.data.client_id)
 					if client and client.server_capabilities.documentHighlightProvider then
-						local highlight_augroup = vim.api.nvim_create_augroup("lsp-highlight", { clear = false })
+						local highlight_augroup =
+							vim.api.nvim_create_augroup("kickstart-lsp-highlight", { clear = false })
 						vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
 							buffer = event.buf,
 							group = highlight_augroup,
@@ -87,14 +72,13 @@ require("lazy").setup({
 						})
 
 						vim.api.nvim_create_autocmd("LspDetach", {
-							group = vim.api.nvim_create_augroup("lsp-detach", { clear = true }),
+							group = vim.api.nvim_create_augroup("kickstart-lsp-detach", { clear = true }),
 							callback = function(event2)
 								vim.lsp.buf.clear_references()
-								vim.api.nvim_clear_autocmds({ group = "lsp-highlight", buffer = event2.buf })
+								vim.api.nvim_clear_autocmds({ group = "kickstart-lsp-highlight", buffer = event2.buf })
 							end,
 						})
 					end
-
 					if client and client.server_capabilities.inlayHintProvider and vim.lsp.inlay_hint then
 						map("<leader>th", function()
 							vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
@@ -106,6 +90,7 @@ require("lazy").setup({
 			local capabilities = vim.lsp.protocol.make_client_capabilities()
 			capabilities = vim.tbl_deep_extend("force", capabilities, require("cmp_nvim_lsp").default_capabilities())
 			local servers = {
+
 				elixirls = {},
 				lua_ls = {
 					settings = {
@@ -137,8 +122,9 @@ require("lazy").setup({
 			})
 		end,
 	},
+	-- autoformat
 
-	{ -- Autoformat
+	{
 		"stevearc/conform.nvim",
 		lazy = false,
 		keys = {
@@ -166,6 +152,7 @@ require("lazy").setup({
 		},
 	},
 
+	-- autocompletion
 	{
 		"hrsh7th/nvim-cmp",
 		event = "InsertEnter",
@@ -223,6 +210,23 @@ require("lazy").setup({
 		end,
 	},
 
+	{
+		"nvim-treesitter/nvim-treesitter",
+		build = ":TSUpdate",
+		config = function()
+			local configs = require("nvim-treesitter.configs")
+			configs.setup({
+				ensure_installed = { "lua", "elixir" },
+				ignore_install = { "javascript" },
+				modules = {},
+				auto_install = true,
+				sync_install = false,
+				highlight = { enable = true },
+				indent = { enable = true },
+			})
+		end,
+	},
+
 	-- markdown
 	{ "preservim/vim-markdown" },
 	{ "opdavies/toggle-checkbox.nvim" },
@@ -237,7 +241,11 @@ vim.o.writebackup = false
 vim.o.splitbelow = true
 
 vim.opt.number = true
+vim.opt.mouse = "a"
 vim.opt.relativenumber = true
+vim.opt.undofile = true
+
+vim.opt.scrolloff = 10
 
 -- set leader key
 vim.g.mapleader = " "
