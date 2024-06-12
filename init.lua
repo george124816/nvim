@@ -228,7 +228,6 @@ require("lazy").setup({
 	},
 
 	-- markdown
-	{ "preservim/vim-markdown" },
 	{ "opdavies/toggle-checkbox.nvim" },
 
 	--- git
