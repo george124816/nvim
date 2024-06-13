@@ -22,6 +22,7 @@ require("lazy").setup({
 	{ "tpope/vim-commentary" },
 	{ "tpope/vim-sleuth" },
 	{ "tpope/vim-projectionist" },
+	"andyl/vim-projectionist-elixir",
 	{ "kassio/neoterm" },
 
 	-- lsp
@@ -309,6 +310,7 @@ vim.keymap.set("n", "<leader>ts", ":TestNearest<CR>")
 vim.keymap.set("n", "<leader>tf", ":TestFile<CR>")
 vim.keymap.set("n", "<leader>ta", ":TestSuite<CR>")
 vim.keymap.set("n", "<leader>tr", ":TestLast<CR>")
+vim.keymap.set("n", "gt", ":A<CR>")
 
 -- elixir keymaps
 

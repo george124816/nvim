@@ -23,6 +23,7 @@
   "vim-elixir": { "branch": "master", "commit": "6dd03f87d825bf0a9f8611eb54076c7952d4f15c" },
   "vim-fugitive": { "branch": "master", "commit": "64d6cafb9dcbacce18c26d7daf617ebb96b273f3" },
   "vim-projectionist": { "branch": "master", "commit": "729f3630a4c19e52e1fd825802d2a1659daeaf48" },
+  "vim-projectionist-elixir": { "branch": "master", "commit": "9cb5075a75af7d7b1b00a80e49d8fb0fedc66f27" },
   "vim-sleuth": { "branch": "master", "commit": "1cc4557420f215d02c4d2645a748a816c220e99b" },
   "vim-test": { "branch": "master", "commit": "6acc7d96487abaaa57a19b0d43efaea6633d6bb7" }
 }
