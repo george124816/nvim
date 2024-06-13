@@ -92,6 +92,7 @@ require("lazy").setup({
 			local servers = {
 
 				elixirls = {},
+				gopls = {},
 				lua_ls = {
 					settings = {
 						Lua = {
@@ -232,6 +233,7 @@ require("lazy").setup({
 
 	--- git
 	{ "tpope/vim-fugitive" },
+	"APZelos/blamer.nvim",
 })
 
 vim.o.swapfile = false
@@ -294,14 +296,20 @@ vim.keymap.set("n", "<leader>fg", builtin.live_grep, {})
 vim.keymap.set("n", "<leader>fb", builtin.buffers, {})
 -- vim.keymap.set('n', '<leader>fh', builtin.help_tags, {})
 
--- Testing
+-- quickfix list navigation
+nnoremap("<leader>cn", vim.cmd.cnext)
+nnoremap("<leader>cp", vim.cmd.cprev)
+nnoremap("<leader>co", vim.cmd.copen, { silent = true })
+nnoremap("<leader>cc", vim.cmd.cc, { silent = true })
+nnoremap("<leader>cC", vim.cmd.cclose, { silent = true })
 
+-- testing
 vim.keymap.set("n", "<leader>ts", ":TestNearest<CR>")
 vim.keymap.set("n", "<leader>tf", ":TestFile<CR>")
 vim.keymap.set("n", "<leader>ta", ":TestSuite<CR>")
 vim.keymap.set("n", "<leader>tr", ":TestLast<CR>")
 
--- Elixir keymaps
+-- elixir keymaps
 
 vim.keymap.set(
 	"n",
