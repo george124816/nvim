@@ -279,6 +279,7 @@ vim.keymap.set("n", "<leader><Tab>", ":e #<CR>")
 
 -- window map
 vim.keymap.set("n", "<leader>w/", ":vsp<CR>")
+vim.keymap.set("n", "<leader>w-", ":sp<CR>")
 vim.keymap.set("n", "<leader>wh", ":wincmd h<CR>")
 vim.keymap.set("n", "<leader>wj", ":wincmd j<CR>")
 vim.keymap.set("n", "<leader>wk", ":wincmd k<CR>")
@@ -297,11 +298,11 @@ vim.keymap.set("n", "<leader>fb", builtin.buffers, {})
 -- vim.keymap.set('n', '<leader>fh', builtin.help_tags, {})
 
 -- quickfix list navigation
-nnoremap("<leader>cn", vim.cmd.cnext)
-nnoremap("<leader>cp", vim.cmd.cprev)
-nnoremap("<leader>co", vim.cmd.copen, { silent = true })
-nnoremap("<leader>cc", vim.cmd.cc, { silent = true })
-nnoremap("<leader>cC", vim.cmd.cclose, { silent = true })
+vim.keymap.set("n", "<leader>cn", vim.cmd.cnext)
+vim.keymap.set("n", "<leader>cp", vim.cmd.cprev)
+vim.keymap.set("n", "<leader>co", vim.cmd.copen, { silent = true })
+vim.keymap.set("n", "<leader>cc", vim.cmd.cc, { silent = true })
+vim.keymap.set("n", "<leader>cC", vim.cmd.cclose, { silent = true })
 
 -- testing
 vim.keymap.set("n", "<leader>ts", ":TestNearest<CR>")
