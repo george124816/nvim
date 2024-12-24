@@ -14,6 +14,9 @@ vim.opt.rtp:prepend(lazypath)
 require("lazy").setup({
 	-- theme
 	{ "catppuccin/nvim", name = "catppuccin", priority = 1000 },
+	{ "miikanissi/modus-themes.nvim", priority = 1000 },
+	{ "kaicataldo/material.vim", priority = 1000 },
+	{ "rebelot/kanagawa.nvim", priority = 1000 },
 
 	-- core
 	{ "nvim-telescope/telescope.nvim", dependencies = { "nvim-lua/plenary.nvim" } },
@@ -25,6 +28,18 @@ require("lazy").setup({
 	"andyl/vim-projectionist-elixir",
 	{ "kassio/neoterm" },
 
+	{
+		"nvim-neo-tree/neo-tree.nvim",
+		branch = "v3.x",
+		dependencies = {
+			"nvim-lua/plenary.nvim",
+			"nvim-tree/nvim-web-devicons", -- not strictly required, but recommended
+			"MunifTanjim/nui.nvim",
+			-- "3rd/image.nvim", -- Optional image support in preview window: See `# Preview Mode` for more information
+		},
+	},
+	-- rest client
+	{ "rest-nvim/rest.nvim" },
 	-- lsp
 	{
 		"neovim/nvim-lspconfig",
@@ -103,9 +118,65 @@ require("lazy").setup({
 						},
 					},
 				},
+				marksman = {},
 			}
 
 			require("mason").setup()
+
+			require("gitsigns").setup({
+				on_attach = function(bufnr)
+					local gitsigns = require("gitsigns")
+
+					local function map(mode, l, r, opts)
+						opts = opts or {}
+						opts.buffer = bufnr
+						vim.keymap.set(mode, l, r, opts)
+					end
+
+					-- Navigation
+					map("n", "]c", function()
+						if vim.wo.diff then
+							vim.cmd.normal({ "]c", bang = true })
+						else
+							gitsigns.nav_hunk("next")
+						end
+					end)
+
+					map("n", "[c", function()
+						if vim.wo.diff then
+							vim.cmd.normal({ "[c", bang = true })
+						else
+							gitsigns.nav_hunk("prev")
+						end
+					end)
+
+					-- Actions
+					map("n", "<leader>hs", gitsigns.stage_hunk)
+					map("n", "<leader>hr", gitsigns.reset_hunk)
+					map("v", "<leader>hs", function()
+						gitsigns.stage_hunk({ vim.fn.line("."), vim.fn.line("v") })
+					end)
+					map("v", "<leader>hr", function()
+						gitsigns.reset_hunk({ vim.fn.line("."), vim.fn.line("v") })
+					end)
+					map("n", "<leader>hS", gitsigns.stage_buffer)
+					map("n", "<leader>hu", gitsigns.undo_stage_hunk)
+					map("n", "<leader>hR", gitsigns.reset_buffer)
+					map("n", "<leader>hp", gitsigns.preview_hunk)
+					map("n", "<leader>hb", function()
+						gitsigns.blame_line({ full = true })
+					end)
+					map("n", "<leader>tb", gitsigns.toggle_current_line_blame)
+					map("n", "<leader>hd", gitsigns.diffthis)
+					map("n", "<leader>hD", function()
+						gitsigns.diffthis("~")
+					end)
+					map("n", "<leader>td", gitsigns.toggle_deleted)
+
+					-- Text object
+					map({ "o", "x" }, "ih", ":<C-U>Gitsigns select_hunk<CR>")
+				end,
+			})
 
 			local ensure_installed = vim.tbl_keys(servers or {})
 			vim.list_extend(ensure_installed, {
@@ -124,7 +195,86 @@ require("lazy").setup({
 			})
 		end,
 	},
-	-- autoformat
+
+	-- dap
+	{
+		"mfussenegger/nvim-dap",
+		dependencies = {
+			-- "leoluz/nvim-dap-go",
+			"rcarriga/nvim-dap-ui",
+			"nvim-neotest/nvim-nio",
+			"williamboman/mason.nvim",
+		},
+		config = function()
+			local dap = require("dap")
+			local ui = require("dapui")
+
+			require("dapui").setup()
+			-- require("dap-go").setup()
+
+			-- Handled by nvim-dap-go
+			-- dap.adapters.go = {
+			--   type = "server",
+			--   port = "${port}",
+			--   executable = {
+			--     command = "dlv",
+			--     args = { "dap", "-l", "127.0.0.1:${port}" },
+			--   },
+			-- }
+
+			-- local elixir_ls_debugger = vim.fn.exepath("elixir-ls-debugger")
+			local elixir_ls_debugger = vim.fn.exepath("elixir-ls-debugger")
+			print(elixir_ls_debugger)
+			if elixir_ls_debugger ~= "" then
+				dap.adapters.mix_task = {
+					type = "executable",
+					command = elixir_ls_debugger,
+				}
+
+				dap.configurations.elixir = {
+					{
+						type = "mix_task",
+						name = "phoenix server",
+						task = "phx.server",
+						request = "launch",
+						projectDir = "${workspaceFolder}",
+						exitAfterTaskReturns = false,
+						debugAutoInterpretAllModules = false,
+					},
+				}
+			end
+
+			vim.keymap.set("n", "<space>b", dap.toggle_breakpoint)
+			vim.keymap.set("n", "<space>gb", dap.run_to_cursor)
+
+			-- Eval var under cursor
+			vim.keymap.set("n", "<space>?", function()
+				require("dapui").eval(nil, { enter = true })
+			end)
+
+			vim.keymap.set("n", "<F1>", dap.continue)
+			vim.keymap.set("n", "<F2>", dap.step_into)
+			vim.keymap.set("n", "<F3>", dap.step_over)
+			vim.keymap.set("n", "<F4>", dap.step_out)
+			vim.keymap.set("n", "<F5>", dap.step_back)
+			vim.keymap.set("n", "<F13>", dap.restart)
+
+			dap.listeners.before.attach.dapui_config = function()
+				ui.open()
+			end
+			dap.listeners.before.launch.dapui_config = function()
+				ui.open()
+			end
+			dap.listeners.before.event_terminated.dapui_config = function()
+				ui.close()
+			end
+			dap.listeners.before.event_exited.dapui_config = function()
+				ui.close()
+			end
+		end,
+	},
+
+	--autoformat
 
 	{
 		"stevearc/conform.nvim",
@@ -218,7 +368,7 @@ require("lazy").setup({
 		config = function()
 			local configs = require("nvim-treesitter.configs")
 			configs.setup({
-				ensure_installed = { "lua", "elixir" },
+				ensure_installed = { "lua", "elixir", "sql", "go", "http" },
 				ignore_install = { "javascript" },
 				modules = {},
 				auto_install = true,
@@ -231,11 +381,45 @@ require("lazy").setup({
 
 	-- markdown
 	{ "opdavies/toggle-checkbox.nvim" },
+	{
+		"iamcco/markdown-preview.nvim",
+		cmd = { "MarkdownPreviewToggle", "MarkdownPreview", "MarkdownPreviewStop" },
+		ft = { "markdown" },
+		build = function()
+			vim.fn["mkdp#util#install"]()
+		end,
+	},
 
 	--- git
 	{ "tpope/vim-fugitive" },
-	"APZelos/blamer.nvim",
+	{ "APZelos/blamer.nvim" },
+	{ "lewis6991/gitsigns.nvim" },
 })
+
+-- dap
+local dap = require("dap")
+
+dap.adapters.mix_task = {
+	type = "executable",
+	command = vim.fn.stdpath("data") .. "/mason/bin/elixir-ls-debugger",
+	args = {},
+}
+
+dap.configurations.elixir = {
+	{
+		type = "mix_task",
+		name = "mix test",
+		task = "test",
+		taskArgs = { "--trace" },
+		request = "launch",
+		startApps = true, -- for Phoenix projects
+		projectDir = "${workspaceFolder}",
+		requireFiles = {
+			"test/**/test_helper.exs",
+			"test/**/*_test.exs",
+		},
+	},
+}
 
 vim.o.swapfile = false
 vim.o.backup = false
@@ -263,16 +447,105 @@ vim.api.nvim_set_keymap("v", "<C-y>", '"+y', { noremap = true, silent = true })
 vim.api.nvim_set_keymap("n", "<C-p>", '"+p', { noremap = true, silent = true })
 vim.api.nvim_set_keymap("v", "<C-p>", '"+p', { noremap = true, silent = true })
 
+vim.g.rest_nvim = {
+	---@type table<string, fun():string> Table of custom dynamic variables
+	--custom_dynamic_variables = {},
+	-----@class rest.Config.Request
+	--request = {
+	--	---@type boolean Skip SSL verification, useful for unknown certificates
+	--	skip_ssl_verification = false,
+	--	---Default request hooks
+	--	---@class rest.Config.Request.Hooks
+	--	hooks = {
+	--		---@type boolean Encode URL before making request
+	--		encode_url = true,
+	--		---@type string Set `User-Agent` header when it is empty
+	--		user_agent = "rest.nvim v" .. require("rest-nvim.api").VERSION,
+	--		---@type boolean Set `Content-Type` header when it is empty and body is provided
+	--		set_content_type = true,
+	--	},
+	--},
+	-----@class rest.Config.Response
+	--response = {
+	--	---Default response hooks
+	--	---@class rest.Config.Response.Hooks
+	--	hooks = {
+	--		---@type boolean Decode the request URL segments on response UI to improve readability
+	--		decode_url = true,
+	--		---@type boolean Format the response body using `gq` command
+	--		format = true,
+	--	},
+	--},
+	-----@class rest.Config.Clients
+	--clients = {
+	--	---@class rest.Config.Clients.Curl
+	--	curl = {
+	--		---Statistics to be shown, takes cURL's `--write-out` flag variables
+	--		---See `man curl` for `--write-out` flag
+	--		---@type RestStatisticsStyle[]
+	--		statistics = {
+	--			{ id = "time_total", winbar = "take", title = "Time taken" },
+	--			{ id = "size_download", winbar = "size", title = "Download size" },
+	--		},
+	--		---Curl-secific request/response hooks
+	--		---@class rest.Config.Clients.Curl.Opts
+	--		opts = {
+	--			---@type boolean Add `--compressed` argument when `Accept-Encoding` header includes
+	--			---`gzip`
+	--			set_compressed = false,
+	--		},
+	--	},
+	--},
+	-----@class rest.Config.Cookies
+	--cookies = {
+	--	---@type boolean Whether enable cookies support or not
+	--	enable = true,
+	--	---@type string Cookies file path
+	--	path = vim.fs.joinpath(vim.fn.stdpath("data") --[[@as string]], "rest-nvim.cookies"),
+	--},
+	-----@class rest.Config.Env
+	--env = {
+	--	---@type boolean
+	--	enable = true,
+	--	---@type string
+	--	pattern = ".*%.env.*",
+	--},
+	-----@class rest.Config.UI
+	--ui = {
+	--	---@type boolean Whether to set winbar to result panes
+	--	winbar = true,
+	--	---@class rest.Config.UI.Keybinds
+	--	keybinds = {
+	--		---@type string Mapping for cycle to previous result pane
+	--		prev = "H",
+	--		---@type string Mapping for cycle to next result pane
+	--		next = "L",
+	--	},
+	--},
+	-----@class rest.Config.Highlight
+	--highlight = {
+	--	---@type boolean Whether current request highlighting is enabled or not
+	--	enable = true,
+	--	---@type number Duration time of the request highlighting in milliseconds
+	--	timeout = 750,
+	--},
+	-----@see vim.log.levels
+	-----@type integer log level
+	--_log_level = vim.log.levels.WARN,
+}
+
 -- configuration file
 vim.keymap.set("n", "<leader>cf", ":e ~/.config/nvim/init.lua<CR>")
 vim.keymap.set("n", "<leader>so", ":source %<CR>")
 
 -- file map
+vim.keymap.set("n", "<leader>ft", ":Neotree<CR>")
 vim.keymap.set("n", "<leader>fs", ":w<CR>")
+vim.keymap.set("n", "<leader>fr", "e %<CR>")
 vim.keymap.set("n", "<leader>qq", ":q<CR>")
 vim.keymap.set("n", "<leader>Q", ":q!<CR>")
 vim.keymap.set("n", "<leader>wd", ":q<CR>")
-vim.keymap.set("n", "<leader>fe", ":e .<CR>")
+vim.keymap.set("n", "<leader>fe", ":Ex<CR>")
 
 -- buffer map
 vim.keymap.set("n", "<leader>bn", ":enew<CR>")
@@ -317,7 +590,7 @@ vim.keymap.set("n", "gt", ":A<CR>")
 vim.keymap.set(
 	"n",
 	"<leader>tp",
-	":T mix format && mix credo && mix dialyzer && mix test<CR>",
+	":T MIX_ENV=dev mix compile --warnings-as-errors && mix format && mix credo && mix dialyzer && mix test<CR>",
 	{ noremap = true, silent = true }
 )
 vim.keymap.set("n", "<leader>tm", ":T MIX_ENV=test mix do ecto.drop, ecto.create, ecto.migrate<CR>")
@@ -327,5 +600,6 @@ vim.keymap.set("n", "<leader>tq", ":Tkill<CR>")
 -- toggle check-box
 vim.keymap.set("n", "<leader>x", ":lua require('toggle-checkbox').toggle()<CR>")
 
--- set theme
-vim.cmd.colorscheme("catppuccin-frappe") -- catppuccin catppuccin-latte, catppuccin-frappe, catppuccin-macchiato, catppuccin-mocha
+-- vim.cmd.colorscheme("catppuccin-mocha") -- catppuccin catppuccin-latte, catppuccin-frappe, catppuccin-macchiato, catppuccin-mocha
+-- vim.cmd.colorscheme("modus_vivendi") -- modus_operandi, modus_vivendi
+vim.cmd.colorscheme("industry")
