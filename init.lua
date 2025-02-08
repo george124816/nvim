@@ -10,6 +10,7 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
 	})
 end
 vim.opt.rtp:prepend(lazypath)
+vim.opt.termguicolors = true
 
 require("lazy").setup({
 	-- theme
@@ -105,6 +106,8 @@ require("lazy").setup({
 
 			local capabilities = vim.lsp.protocol.make_client_capabilities()
 			capabilities = vim.tbl_deep_extend("force", capabilities, require("cmp_nvim_lsp").default_capabilities())
+			capabilities.textDocument.completion.completionItem.snippetSupport = true
+
 			local servers = {
 
 				elixirls = {},
@@ -181,6 +184,7 @@ require("lazy").setup({
 			local ensure_installed = vim.tbl_keys(servers or {})
 			vim.list_extend(ensure_installed, {
 				"stylua",
+				"emmet_language_server",
 			})
 			require("mason-tool-installer").setup({ ensure_installed = ensure_installed })
 
@@ -192,6 +196,10 @@ require("lazy").setup({
 						require("lspconfig")[server_name].setup(server)
 					end,
 				},
+			})
+
+			require("lspconfig").html.setup({
+				capabilities = capabilities,
 			})
 		end,
 	},
@@ -368,8 +376,8 @@ require("lazy").setup({
 		config = function()
 			local configs = require("nvim-treesitter.configs")
 			configs.setup({
-				ensure_installed = { "lua", "elixir", "sql", "go", "http" },
-				ignore_install = { "javascript" },
+				ensure_installed = { "lua", "elixir", "sql", "go", "http", "html" },
+				ignore_install = {},
 				modules = {},
 				auto_install = true,
 				sync_install = false,
@@ -394,6 +402,19 @@ require("lazy").setup({
 	{ "tpope/vim-fugitive" },
 	{ "APZelos/blamer.nvim" },
 	{ "lewis6991/gitsigns.nvim" },
+
+	--- frontend
+	{ "norcalli/nvim-colorizer.lua" },
+	{
+		"barrett-ruth/live-server.nvim",
+		build = "pnpm add -g live-server",
+		cmd = { "LiveServerStart", "LiveServerStop" },
+		config = true,
+	},
+})
+
+require("colorizer").setup({
+	"css",
 })
 
 -- dap
