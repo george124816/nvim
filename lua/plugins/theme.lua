@@ -36,6 +36,7 @@ return {
                     gitsigns = true,
                     nvimtree = true,
                     treesitter = true,
+		    telescope = true,
                     notify = false,
                     mini = { enabled = true, indentscope_color = "" },
                 },
