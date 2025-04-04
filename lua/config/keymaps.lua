@@ -48,3 +48,6 @@ vim.api.nvim_set_keymap("n", "gt", ":A<CR>", { noremap = true, silent = true })
 -- Terminal
 vim.keymap.set("n", "<leader>tt", ":ToggleTerm<CR>")
 vim.api.nvim_set_keymap("t", "<Esc>", "<C-\\><C-n>", { noremap = true })
+
+-- Elixir
+vim.keymap.set("n", "<leader>tm", ':TermExec cmd="MIX_ENV=test mix do ecto.drop, ecto.create, ecto.migrate"<CR>')
