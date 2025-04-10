@@ -51,3 +51,6 @@ vim.api.nvim_set_keymap("t", "<Esc>", "<C-\\><C-n>", { noremap = true })
 
 -- Elixir
 vim.keymap.set("n", "<leader>tm", ':TermExec cmd="MIX_ENV=test mix do ecto.drop, ecto.create, ecto.migrate"<CR>')
+
+-- CodeCompanion
+vim.keymap.set("n", "<leader>cc", ":CodeCompanionChat<CR>", { desc = "Abrir chat do CodeCompanion" })
