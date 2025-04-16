@@ -1,6 +1,6 @@
 {
   "avante.nvim": { "branch": "main", "commit": "04336913b32f66f45b20a6ba2f033dd742f04374" },
-  "catppuccin": { "branch": "main", "commit": "5b5e3aef9ad7af84f463d17b5479f06b87d5c429" },
+  "charleston": { "branch": "main", "commit": "cbc1d9efd4820350d8dd0ce1a289ec641afa13bd" },
   "cmp-buffer": { "branch": "main", "commit": "b74fab3656eea9de20a9b8116afa3cfc4ec09657" },
   "cmp-cmdline": { "branch": "main", "commit": "d250c63aa13ead745e3a40f61fdd3470efde3923" },
   "cmp-nvim-lsp": { "branch": "main", "commit": "a8912b88ce488f411177fc8aed358b04dc246d7b" },
