@@ -19,7 +19,7 @@ return {
 		config = function()
 			require("mason-lspconfig").setup()
 
-			local servers_to_format = { "gopls", "elixirls", "lua_ls" }
+			local servers_to_format = { "gopls", "elixirls", "lua_ls", "kotlin_language_server" }
 			local on_attach = function(client, bufnr)
 				-- Enable formatting on save for Go (gopls), Elixir (elixirls), and Lua (lua-ls)
 				if vim.tbl_contains(servers_to_format, client.name) then

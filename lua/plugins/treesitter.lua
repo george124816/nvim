@@ -16,6 +16,7 @@ return {
 				"markdown_inline",
 				"go",
 				"elixir",
+				"kotlin",
 			},
 
 			-- Install parsers synchronously (only applied to `ensure_installed`)
