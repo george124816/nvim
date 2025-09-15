@@ -19,9 +19,9 @@ return {
 		config = function()
 			require("mason-lspconfig").setup()
 
-			local servers_to_format = { "gopls", "elixirls", "lua_ls", "kotlin_language_server" }
+			local servers_to_format = { "gopls", "elixirls", "lua_ls", "kotlin_language_server", "pylsp" }
 			local on_attach = function(client, bufnr)
-				-- Enable formatting on save for Go (gopls), Elixir (elixirls), and Lua (lua-ls)
+				-- Enable formatting on save for Go (gopls), Elixir (elixirls), Lua (lua-ls), Kotlin, and Python (pylsp)
 				if vim.tbl_contains(servers_to_format, client.name) then
 					-- Set up formatting on save
 					vim.cmd([[autocmd BufWritePre <buffer> lua vim.lsp.buf.format()]])
@@ -65,6 +65,23 @@ return {
 				-- 		},
 				-- 	})
 				-- end,
+
+				-- Python LSP configuration
+				["pylsp"] = function()
+					require("lspconfig").pylsp.setup({
+						on_attach = on_attach,
+						settings = {
+							pylsp = {
+								plugins = {
+									pycodestyle = {
+										ignore = {'W391'},
+										maxLineLength = 100
+									}
+								}
+							}
+						},
+					})
+				end,
 
 
 			}
