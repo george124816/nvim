@@ -1,1 +1,2 @@
-required packages gcc, cmake and fzf
+ubuntu: 
+required packages gcc, cmake, yarn and fzf
