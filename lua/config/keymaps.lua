@@ -34,6 +34,7 @@ vim.keymap.set("n", "<leader>bn", ":enew<CR>")
 
 -- LSP
 vim.api.nvim_set_keymap('n', '<leader>lf', '<cmd>lua vim.lsp.buf.format()<CR>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', '<leader>e', '<cmd>lua vim.diagnostic.open_float()<CR>', { noremap = true, silent = true })
 
 -- Git
 vim.keymap.set("n", "<leader>gs", ":Git<CR>", { noremap = true, silent = true })
