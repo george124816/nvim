@@ -2,7 +2,6 @@ return {
 
   {
     "williamboman/mason.nvim",
-    version = "^1.0.0",
     config = function()
       require("mason").setup({
         ui = {
@@ -18,11 +17,8 @@ return {
 
   {
     "williamboman/mason-lspconfig.nvim",
-    version = "^1.0.0",
     dependencies = { "neovim/nvim-lspconfig", "hrsh7th/cmp-nvim-lsp" },
     config = function()
-
-      require("mason-lspconfig").setup()
 
       local capabilities = require("cmp_nvim_lsp").default_capabilities()
 
@@ -53,18 +49,20 @@ return {
         vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, opts)
       end
 
-      require("mason-lspconfig").setup_handlers({
-        function(server_name)
-
-          vim.lsp.config(server_name, {
-            on_attach = on_attach,
-            capabilities = capabilities,
-          })
-
-          vim.lsp.enable(server_name)
-
-        end,
+      require("mason-lspconfig").setup({
+        automatic_installation = true,
       })
+
+      local mason_lspconfig = require("mason-lspconfig")
+      local installed_servers = mason_lspconfig.get_installed_servers()
+
+      for _, server_name in ipairs(installed_servers) do
+        vim.lsp.config(server_name, {
+          on_attach = on_attach,
+          capabilities = capabilities,
+        })
+        vim.lsp.enable(server_name)
+      end
     end,
   },
 
