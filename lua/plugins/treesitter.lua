@@ -1,43 +1,44 @@
+local ensure_installed = {
+	"c",
+	"lua",
+	"vim",
+	"vimdoc",
+	"query",
+	"markdown",
+	"markdown_inline",
+	"go",
+	"elixir",
+	"kotlin",
+	"python",
+}
+
 return {
 	"nvim-treesitter/nvim-treesitter",
-	build = function()
-		require("nvim-treesitter.install").update({ with_sync = true })()
-	end,
+	branch = "main",
+	lazy = false,
+	build = ":TSUpdate",
 	config = function()
-		require("nvim-treesitter.configs").setup({
-			ensure_installed = {
-				"c",
-				"lua",
-				"vim",
-				"vimdoc",
-				"query",
-				"markdown",
-				"markdown_inline",
-				"go",
-				"elixir",
-				"kotlin",
-				"python",
-				"lua"
-			},
+		require("nvim-treesitter").setup()
 
-			sync_install = false,
-			auto_install = true,
+		require("nvim-treesitter").install(ensure_installed)
 
-			ignore_install = { "javascript" },
+		vim.api.nvim_create_autocmd("FileType", {
+			group = vim.api.nvim_create_augroup("treesitter_start", { clear = true }),
+			callback = function(args)
+				local buf = args.buf
 
-			highlight = {
-				enable = true,
+				-- Skip very large files to keep highlighting responsive.
+				local max_filesize = 100 * 1024
+				local ok, stats = pcall(vim.uv.fs_stat, vim.api.nvim_buf_get_name(buf))
+				if ok and stats and stats.size > max_filesize then
+					return
+				end
 
-				disable = function(_, buf)
-					local max_filesize = 100 * 1024
-					local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(buf))
-					if ok and stats and stats.size > max_filesize then
-						return true
-					end
-				end,
-
-				additional_vim_regex_highlighting = false,
-			},
+				local lang = vim.treesitter.language.get_lang(args.match)
+				if lang and vim.treesitter.language.add(lang) then
+					vim.treesitter.start(buf, lang)
+				end
+			end,
 		})
 	end,
 }
